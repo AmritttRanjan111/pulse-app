@@ -12,9 +12,34 @@ export default async function handler(req, res) {
 
     const API_KEY = process.env.GEMINI_API_KEY;
 
-    const prompt = `Analyze this business idea and return ONLY JSON:
+    const prompt = `You are a market research expert. Analyze this idea and return ONLY valid JSON.
 
-"${idea}"`;
+Idea: "${idea}"
+
+Return JSON with:
+{
+  "viabilityScore": number,
+  "businessTitle": string,
+  "scoreVerdict": string,
+  "market": {
+    "tam": string,
+    "sam": string,
+    "som": string,
+    "summary": string
+  },
+  "survey": {
+    "results": [
+      {"label": string, "percentage": number}
+    ],
+    "keyFinding": string
+  },
+  "competitors": string,
+  "personas": [],
+  "trends": [],
+  "pricing": string,
+  "experts": [],
+  "gtm": string
+}`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
@@ -31,10 +56,28 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // 🔥 SAFETY CHECK (THIS FIXES YOUR ERROR)
+    if (!data.candidates || !data.candidates.length) {
+      return res.status(500).json({
+        error: "No response from AI",
+        full: data
+      });
+    }
+
     let text = data.candidates[0].content.parts[0].text;
+
     text = text.replace(/```json|```/g, '').trim();
 
-    const parsed = JSON.parse(text);
+    let parsed;
+
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      return res.status(500).json({
+        error: "JSON parse failed",
+        raw: text
+      });
+    }
 
     return res.status(200).json(parsed);
 
