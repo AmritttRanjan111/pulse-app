@@ -1,9 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Pulse</title>
+  <title>Pulse App</title>
 </head>
+
 <body>
-  <h1>Pulse is Running 🚀 v3</h1>
+
+  <h1>Pulse is Running 🚀 v4</h1>
+
+  <input type="text" id="ideaInput" placeholder="Enter your business idea" />
+  <button onclick="analyzeIdea()">Analyze</button>
+
+  <p id="result"></p>
+
+  <script>
+    async function analyzeIdea() {
+      const idea = document.getElementById("ideaInput").value;
+
+      document.getElementById("result").innerText = "Analyzing...";
+
+      setTimeout(() => {
+        document.getElementById("result").innerText =
+          "AI says: This idea has potential 🚀";
+      }, 1000);
+    }
+  </script>
+
 </body>
 </html>
