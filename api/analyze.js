@@ -12,52 +12,40 @@ export default async function handler(req, res) {
 
     const API_KEY = process.env.GEMINI_API_KEY;
 
-    const prompt = `You are a market research expert. Analyze this idea and return ONLY valid JSON.
-
-Idea: "${idea}"
-
-Return JSON with:
-{
-  "viabilityScore": number,
-  "businessTitle": string,
-  "scoreVerdict": string,
-  "market": {
-    "tam": string,
-    "sam": string,
-    "som": string,
-    "summary": string
-  },
-  "survey": {
-    "results": [
-      {"label": string, "percentage": number}
-    ],
-    "keyFinding": string
-  },
-  "competitors": string,
-  "personas": [],
-  "trends": [],
-  "pricing": string,
-  "experts": [],
-  "gtm": string
-}`;
-
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
+          contents: [
+            {
+              parts: [
+                {
+                  text: `Return ONLY JSON market research for this idea:
+
+${idea}
+
+Include:
+- viabilityScore
+- market
+- competitors
+- personas
+- pricing
+- gtm`
+                }
+              ]
+            }
+          ]
         })
       }
     );
 
     const data = await response.json();
 
-    // 🔥 SAFETY CHECK (THIS FIXES YOUR ERROR)
-    if (!data.candidates || !data.candidates.length) {
+    if (!data.candidates) {
       return res.status(500).json({
         error: "No response from AI",
         full: data
@@ -72,9 +60,9 @@ Return JSON with:
 
     try {
       parsed = JSON.parse(text);
-    } catch (e) {
+    } catch {
       return res.status(500).json({
-        error: "JSON parse failed",
+        error: "Invalid JSON from AI",
         raw: text
       });
     }
