@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
     const API_KEY = process.env.GEMINI_API_KEY;
 
-    // Use v1beta for gemini-1.5-flash
+    // Updated URL: Using v1beta and the direct model path
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
       {
@@ -40,7 +40,6 @@ export default async function handler(req, res) {
               ]
             }
           ],
-          // This ensures the model only outputs valid JSON
           generationConfig: {
             response_mime_type: "application/json",
           }
@@ -50,15 +49,16 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // Check if the API returned an error
+    // Catching specific Google API errors early
     if (data.error) {
       return res.status(data.error.code || 500).json({
         error: "Google API Error",
-        message: data.error.message
+        message: data.error.message,
+        details: data.error.status
       });
     }
 
-    if (!data.candidates || data.candidates.length === 0) {
+    if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts) {
       return res.status(500).json({
         error: "No response from AI",
         full: data
@@ -69,14 +69,11 @@ export default async function handler(req, res) {
     
     let parsed;
     try {
-      // With response_mime_type: "application/json", 
-      // the model shouldn't include markdown backticks anymore.
       parsed = JSON.parse(text);
     } catch (e) {
-      return res.status(500).json({
-        error: "Invalid JSON from AI",
-        raw: text
-      });
+      // Fallback: If it still returns markdown triple backticks, strip them
+      const cleanedText = text.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(cleanedText);
     }
 
     return res.status(200).json(parsed);
