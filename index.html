@@ -6,7 +6,6 @@
 <title>Pulse — AI Market Research</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-/* (same CSS as your current file) */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg0:#0C0F14;--bg1:#111620;--bg2:#1A2030;--bg3:#212840;
@@ -16,8 +15,10 @@
   --success:#1A7A4A;--success-bg:rgba(26,122,74,0.15);
   --danger:#A33030;--danger-bg:rgba(163,48,48,0.15);
   --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --glass-bg: rgba(17, 22, 32, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
-html,body{height:100%;background:var(--bg0);color:var(--t1);font-family:var(--font);font-size:14px;line-height:1.6}
+html,body{height:100%;background:var(--bg0);color:var(--t1);font-family:var(--font);font-size:14px;line-height:1.75}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
 
@@ -32,55 +33,69 @@ nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding
 .hero-eyebrow{font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px}
 .hero-eyebrow::before,.hero-eyebrow::after{content:'';flex:1;max-width:40px;height:1px;background:var(--amber-border)}
 .hero h1{font-size:42px;font-weight:600;letter-spacing:-1.5px;line-height:1.15;margin-bottom:16px;color:var(--t1)}
-.hero h1 span{color:var(--blue-light)}
+.hero h1 span{background:linear-gradient(135deg, #1A8EC4, #2ECC8A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .hero p{font-size:16px;color:var(--t2);line-height:1.7;max-width:480px;margin:0 auto 40px}
 
-/* INPUT AREA */
-.input-card{background:var(--bg1);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px;max-width:720px;margin:0 auto 32px}
+/* INPUT AREA & GLASSMORPHISM */
+.input-card{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);box-shadow:0 4px 24px -8px rgba(0,0,0,0.5);border-radius:16px;padding:28px;max-width:720px;margin:0 auto 32px;transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease}
 .input-label{font-size:12px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px}
-.idea-input{width:100%;background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;font-size:15px;color:var(--t1);font-family:var(--font);resize:vertical;min-height:80px;outline:none;transition:border-color 0.2s}
-.idea-input:focus{border-color:var(--blue)}
+.idea-input{width:100%;background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;font-size:15px;color:var(--t1);font-family:var(--font);resize:vertical;min-height:80px;outline:none;transition:all 0.3s ease;box-shadow:inset 0 2px 4px rgba(0,0,0,0.2)}
+.idea-input:focus{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(26,142,196,0.2),inset 0 2px 4px rgba(0,0,0,0.2)}
 .idea-input::placeholder{color:var(--t3)}
-.input-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:gap}
+.char-counter{position:absolute;bottom:12px;right:16px;font-size:11px;color:var(--t3);font-family:var(--mono)}
+.input-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:12px}
 .input-hints{display:flex;gap:8px;flex-wrap:wrap}
 .hint-pill{background:var(--bg2);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--t3);cursor:pointer;transition:all 0.15s}
 .hint-pill:hover{border-color:var(--blue);color:var(--blue-light)}
-.analyze-btn{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;white-space:nowrap}
-.analyze-btn:hover{background:var(--blue-light)}
-.analyze-btn:disabled{opacity:0.5;cursor:not-allowed}
-.analyze-btn .btn-icon{font-size:16px}
 
-/* LOADING */
+/* BUTTONS */
+.analyze-btn{background:linear-gradient(135deg,#0F6E9A,#1A8EC4);box-shadow:0 4px 12px rgba(15,110,154,0.3);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;white-space:nowrap;transform:translateY(0)}
+.analyze-btn:hover:not(:disabled){transform:translateY(-1px) scale(1.02);box-shadow:0 6px 16px rgba(15,110,154,0.4)}
+.analyze-btn:active:not(:disabled){transform:translateY(1px) scale(0.98)}
+.analyze-btn:disabled{opacity:0.5;cursor:not-allowed}
+
+/* LOADING STATE & SKELETONS */
 .loading-state{display:none;text-align:center;padding:48px 32px;max-width:720px;margin:0 auto}
 .loading-state.active{display:block}
 .loading-spinner{width:40px;height:40px;border:2px solid rgba(255,255,255,0.08);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.progress-bar-container{width:100%;max-width:240px;height:4px;background:var(--bg2);border-radius:2px;margin:0 auto 16px;overflow:hidden;position:relative}
+.progress-bar-fill{height:100%;width:0%;background:var(--blue-light);border-radius:2px;animation:loadProgress 30s cubic-bezier(0.1,0.8,0.3,1) forwards}
+@keyframes loadProgress{0%{width:0%}100%{width:95%}}
+.skeleton-report{max-width:400px;margin:0 auto 24px;opacity:0.5}
+.skeleton-line{height:10px;background:var(--bg3);border-radius:4px;margin-bottom:8px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:0.3}}
 .loading-steps{display:flex;flex-direction:column;gap:8px;max-width:320px;margin:20px auto 0}
 .loading-step{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:13px;color:var(--t3);transition:all 0.3s}
 .loading-step.active{background:var(--blue-bg);color:var(--blue-light)}
 .loading-step.done{color:var(--success)}
 .step-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
 
-/* REPORT */
+/* REPORT AREA & STICKY HEADER */
 .report-area{display:none;max-width:720px;margin:0 auto;padding:0 32px 60px}
 .report-area.active{display:block}
-.report-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
-.report-title{font-size:20px;font-weight:600;letter-spacing:-0.3px}
+.report-sticky-header{position:sticky;top:56px;z-index:90;background:rgba(12,15,20,0.85);backdrop-filter:blur(12px);padding:16px 0;margin-bottom:24px;border-bottom:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
 .report-actions{display:flex;gap:8px}
 .action-btn{background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 16px;font-size:13px;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all 0.15s;display:flex;align-items:center;gap:6px}
 .action-btn:hover{border-color:var(--blue);color:var(--blue-light)}
+.primary-btn{color:#fff;background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2)}
+.primary-btn:hover{background:rgba(255,255,255,0.15);color:#fff}
 
-/* SCORE BADGE */
-.score-row{display:flex;align-items:center;gap:16px;background:var(--bg1);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px 20px;margin-bottom:20px}
-.score-circle{width:56px;height:56px;border-radius:50%;border:2px solid var(--success);background:var(--success-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+/* SCORE BADGE DYNAMIC */
+.score-row{display:flex;align-items:center;gap:16px;margin:0;border:none;background:transparent;padding:0}
+.score-circle{width:56px;height:56px;border-radius:50%;background:conic-gradient(#2ECC8A 0%,var(--bg2) 0%);display:flex;align-items:center;justify-content:center;border:none}
+.score-inner{width:48px;height:48px;border-radius:50%;background:var(--bg1);display:flex;align-items:center;justify-content:center}
 .score-num{font-size:20px;font-weight:600;color:#2ECC8A;line-height:1;font-family:var(--mono)}
-.score-lbl{font-size:9px;color:#2ECC8A;text-transform:uppercase;letter-spacing:0.05em}
 .score-info{flex:1}
-.score-business{font-size:15px;font-weight:500;margin-bottom:3px}
+.score-business{font-size:15px;font-weight:500;color:var(--t1);margin-bottom:3px}
 .score-verdict{font-size:12px;color:var(--t2)}
 
-/* SECTION CARDS */
-.section-card{background:var(--bg1);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px}
+/* SECTION CARDS & ANIMATIONS */
+.section-card{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);box-shadow:0 4px 24px -8px rgba(0,0,0,0.5);border-radius:12px;padding:20px;margin-bottom:14px;transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease}
+.section-card:hover{transform:translateY(-2px);box-shadow:0 12px 32px -8px rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.15)}
+.fade-up{opacity:0;transform:translateY(20px);animation:fadeUpAnim 0.6s cubic-bezier(0.16,1,0.3,1) forwards}
+@keyframes fadeUpAnim{to{opacity:1;transform:translateY(0)}}
+
 .section-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .si-blue{background:var(--blue-bg)}
@@ -90,54 +105,48 @@ nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding
 .ai-tag{font-size:10px;background:var(--amber-bg);color:var(--amber);padding:2px 7px;border-radius:4px;border:1px solid var(--amber-border);font-weight:500;margin-left:auto}
 .real-tag{font-size:10px;background:var(--success-bg);color:#2ECC8A;padding:2px 7px;border-radius:4px;border:1px solid rgba(26,122,74,0.3);font-weight:500;margin-left:auto}
 .section-body{font-size:13px;color:var(--t2);line-height:1.75;white-space:pre-wrap}
+.section-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);margin:16px 0}
 
-/* MARKET METRICS */
+/* TOOLTIPS & METRICS */
 .metric-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 .metric-box{background:var(--bg2);border-radius:8px;padding:12px;text-align:center}
 .metric-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px}
 .metric-value{font-size:18px;font-weight:600;color:var(--t1);font-family:var(--mono)}
-.metric-sub{font-size:11px;color:var(--t3);margin-top:2px}
+.has-tooltip{cursor:help;border-bottom:1px dotted var(--t3);position:relative}
+.has-tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--bg3);color:var(--t1);padding:6px 10px;border-radius:6px;font-size:11px;white-space:nowrap;font-family:var(--font);z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.5);pointer-events:none}
 
-/* BAR CHART */
+/* BAR CHART (Enhanced) */
 .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .bar-label{font-size:12px;color:var(--t2);width:140px;flex-shrink:0}
 .bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
-.bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+.bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease;background:linear-gradient(90deg,#0F6E9A,#1A8EC4) !important;box-shadow:0 0 8px rgba(26,142,196,0.4)}
 .bar-val{font-size:11px;color:var(--t3);width:32px;text-align:right;font-family:var(--mono)}
 
-/* EXPERT */
+/* EXPERT, TRENDS, PERSONA */
 .expert-item{background:var(--bg2);border-radius:8px;padding:12px;margin-bottom:8px}
 .expert-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .expert-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue-bg);border:1px solid rgba(15,110,154,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--blue-light)}
 .expert-name{font-size:12px;font-weight:500;color:var(--t1)}
 .expert-role{font-size:11px;color:var(--t3)}
 .expert-quote{font-size:12px;color:var(--t2);line-height:1.6;font-style:italic;padding-left:10px;border-left:2px solid rgba(15,110,154,0.4)}
-
-/* DISCLAIMER */
 .disclaimer{background:rgba(201,138,0,0.06);border:1px solid var(--amber-border);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--amber);margin-top:12px;line-height:1.5}
-
-/* TREND */
 .trend-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
 .trend-item:last-child{border-bottom:none}
 .trend-name{flex:1;font-size:12px;color:var(--t1)}
 .trend-vel{font-size:11px;color:#2ECC8A;font-family:var(--mono);font-weight:500}
-
-/* PERSONA */
 .persona-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .persona-card{background:var(--bg2);border-radius:8px;padding:10px}
 .persona-name{font-size:12px;font-weight:500;color:var(--t1);margin-bottom:2px}
 .persona-demo{font-size:11px;color:var(--t3);margin-bottom:6px}
 .persona-desc{font-size:11px;color:var(--t2);line-height:1.5}
 
-/* ERROR */
+/* ERROR & FOOTER */
 .error-state{display:none;text-align:center;padding:32px;max-width:720px;margin:0 auto}
 .error-state.active{display:block}
 .error-box{background:var(--danger-bg);border:1px solid rgba(163,48,48,0.3);border-radius:12px;padding:20px;font-size:13px;color:#E05555}
-
-/* FOOTER */
 footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:1px solid rgba(255,255,255,0.04)}
 
-/* responsive */
+/* RESPONSIVE */
 @media(max-width:600px){
   .hero h1{font-size:28px}
   .metric-grid{grid-template-columns:1fr}
@@ -154,18 +163,19 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
   <div class="nav-badge">AI Powered · Free</div>
 </nav>
 
-<!-- HERO -->
 <div class="hero">
   <div class="hero-eyebrow">For Small Businesses & Freelancers</div>
   <h1>Market research that used to cost <span>₹50,000</span> — now free</h1>
   <p>Type your business idea. Get a full market research report in 60 seconds — market size, competitors, customer personas, pricing strategy and more.</p>
 </div>
 
-<!-- INPUT -->
 <div class="input-card" id="inputSection">
   <div class="input-label">Describe your business idea</div>
-  <textarea class="idea-input" id="ideaInput" placeholder="eg. A monthly subscription box delivering 4 premium craft coffees from Indian roasters to customers across India for ₹999/month"></textarea>
-  <div class="input-footer" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;gap:12px;flex-wrap:wrap">
+  <div style="position: relative;">
+    <textarea class="idea-input" id="ideaInput" placeholder="eg. A monthly subscription box delivering 4 premium craft coffees from Indian roasters to customers across India for ₹999/month" maxlength="400"></textarea>
+    <div class="char-counter" id="charCount">0/400</div>
+  </div>
+  <div class="input-footer">
     <div class="input-hints">
       <div class="hint-pill" onclick="setIdea('Cloud kitchen for healthy tiffin service in Pune targeting working professionals')">Tiffin service</div>
       <div class="hint-pill" onclick="setIdea('Online tutoring platform for Class 10-12 students in India focused on Maths and Science')">EdTech tutoring</div>
@@ -177,11 +187,18 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
   </div>
 </div>
 
-<!-- LOADING -->
 <div class="loading-state" id="loadingState">
   <div class="loading-spinner"></div>
-  <p style="color:var(--t2);font-size:14px;margin-bottom:8px">Pulse is analysing your idea...</p>
-  <p style="color:var(--t3);font-size:12px">Usually takes 30–60 seconds</p>
+  <div class="progress-bar-container"><div class="progress-bar-fill"></div></div>
+  <p style="color:var(--t1);font-size:15px;font-weight:500;margin-bottom:8px">Analyzing market signals...</p>
+  <p style="color:var(--t3);font-size:13px;margin-bottom:24px">Running deep analysis against real & synthetic data models</p>
+  
+  <div class="skeleton-report">
+    <div class="skeleton-line" style="width: 40%;"></div>
+    <div class="skeleton-line" style="width: 100%;"></div>
+    <div class="skeleton-line" style="width: 80%;"></div>
+  </div>
+
   <div class="loading-steps">
     <div class="loading-step active" id="step1"><div class="step-dot"></div>Fetching real market data</div>
     <div class="loading-step" id="step2"><div class="step-dot"></div>Running synthetic survey (500 responses)</div>
@@ -191,51 +208,57 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
   </div>
 </div>
 
-<!-- ERROR -->
 <div class="error-state" id="errorState">
   <div class="error-box" id="errorMsg">Something went wrong. Please try again.</div>
   <button class="analyze-btn" style="margin:16px auto 0" onclick="resetApp()">Try Again</button>
 </div>
 
-<!-- REPORT -->
 <div class="report-area" id="reportArea">
-  <div class="report-header">
-    <div class="report-title" id="reportTitle">Market Research Report</div>
+  
+  <div class="report-sticky-header">
+    <div class="score-row">
+      <div class="score-circle" id="scoreCircle">
+        <div class="score-inner">
+          <div class="score-num" id="viabilityScore">--</div>
+        </div>
+      </div>
+      <div class="score-info">
+        <div class="score-business" id="businessTitle">Analysing...</div>
+        <div class="score-verdict" id="scoreVerdict">AI-generated market intelligence report</div>
+      </div>
+    </div>
     <div class="report-actions">
-      <button class="action-btn" onclick="resetApp()">↩ New Analysis</button>
-      <button class="action-btn" onclick="downloadReport()">↓ Download TXT</button>
+      <button class="action-btn" onclick="copyReport()">📋 Copy Link</button>
+      <button class="action-btn" onclick="downloadReport()">↓ Export PDF</button>
+      <button class="action-btn primary-btn" onclick="resetApp()">↩ Edit Idea</button>
     </div>
   </div>
 
-  <!-- SCORE -->
-  <div class="score-row">
-    <div class="score-circle">
-      <div class="score-num" id="viabilityScore">--</div>
-      <div class="score-lbl">Score</div>
-    </div>
-    <div class="score-info">
-      <div class="score-business" id="businessTitle">Analysing...</div>
-      <div class="score-verdict" id="scoreVerdict">AI-generated market intelligence report</div>
-    </div>
-  </div>
-
-  <!-- MARKET SIZE -->
-  <div class="section-card">
+  <div class="section-card fade-up" style="animation-delay: 0.1s;">
     <div class="section-head">
       <div class="section-icon si-blue">📐</div>
       <div class="section-title">Market Size Estimate</div>
       <div class="real-tag">Real Data</div>
     </div>
     <div class="metric-grid" id="marketMetrics">
-      <div class="metric-box"><div class="metric-label">TAM</div><div class="metric-value" id="tamVal">--</div><div class="metric-sub">Total market</div></div>
-      <div class="metric-box"><div class="metric-label">SAM</div><div class="metric-value" id="samVal">--</div><div class="metric-sub">Serviceable</div></div>
-      <div class="metric-box"><div class="metric-label">SOM</div><div class="metric-value" id="somVal">--</div><div class="metric-sub">Your target</div></div>
+      <div class="metric-box">
+        <div class="metric-label has-tooltip" data-tooltip="Total Addressable Market: Total demand for the product.">TAM</div>
+        <div class="metric-value" id="tamVal">--</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label has-tooltip" data-tooltip="Serviceable Available Market: Segment of TAM targeted by your products.">SAM</div>
+        <div class="metric-value" id="samVal">--</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label has-tooltip" data-tooltip="Serviceable Obtainable Market: Portion of SAM you can capture.">SOM</div>
+        <div class="metric-value" id="somVal">--</div>
+      </div>
     </div>
+    <div class="section-divider"></div>
     <div class="section-body" id="marketBody"></div>
   </div>
 
-  <!-- SURVEY -->
-  <div class="section-card">
+  <div class="section-card fade-up" style="animation-delay: 0.2s;">
     <div class="section-head">
       <div class="section-icon si-amber">🧪</div>
       <div class="section-title">Synthetic Consumer Survey — 500 Responses</div>
@@ -245,8 +268,7 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
     <div class="section-body" id="surveyBody"></div>
   </div>
 
-  <!-- COMPETITORS -->
-  <div class="section-card">
+  <div class="section-card fade-up" style="animation-delay: 0.3s;">
     <div class="section-head">
       <div class="section-icon si-blue">🔭</div>
       <div class="section-title">Competitor Landscape</div>
@@ -255,8 +277,7 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
     <div class="section-body" id="competitorBody"></div>
   </div>
 
-  <!-- PERSONAS -->
-  <div class="section-card">
+  <div class="section-card fade-up" style="animation-delay: 0.4s;">
     <div class="section-head">
       <div class="section-icon si-green">👤</div>
       <div class="section-title">Customer Personas</div>
@@ -265,8 +286,7 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
     <div class="persona-grid" id="personaGrid"></div>
   </div>
 
-  <!-- TRENDS -->
-  <div class="section-card">
+  <div class="section-card fade-up" style="animation-delay: 0.5s;">
     <div class="section-head">
       <div class="section-icon si-blue">📈</div>
       <div class="section-title">Rising Industry Trends</div>
@@ -275,8 +295,7 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
     <div id="trendList"></div>
   </div>
 
-  <!-- PRICING -->
-  <div class="section-card">
+  <div class="section-card fade-up" style="animation-delay: 0.6s;">
     <div class="section-head">
       <div class="section-icon si-amber">💰</div>
       <div class="section-title">Pricing Strategy</div>
@@ -285,8 +304,7 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
     <div class="section-body" id="pricingBody"></div>
   </div>
 
-  <!-- EXPERT LENSES -->
-  <div class="section-card">
+  <div class="section-card fade-up" style="animation-delay: 0.7s;">
     <div class="section-head">
       <div class="section-icon si-amber">◆</div>
       <div class="section-title">Expert Lenses</div>
@@ -296,8 +314,7 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
     <div class="disclaimer">These are AI-generated perspectives based on public information and known philosophies of these individuals. This does not represent real advice from them.</div>
   </div>
 
-  <!-- GTM -->
-  <div class="section-card">
+  <div class="section-card fade-up" style="animation-delay: 0.8s;">
     <div class="section-head">
       <div class="section-icon si-green">🗓️</div>
       <div class="section-title">90-Day Go-To-Market Plan</div>
@@ -310,16 +327,65 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
 
 <footer>Pulse · AI-powered market research for small businesses · All AI-generated content is labelled · Not financial advice</footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <script>
-/* -------- helpers & UI -------- */
-function setIdea(t){ document.getElementById('ideaInput').value = t; }
+/* -------- UI Upgrades & Micro-interactions -------- */
+
+// Textarea Character Counter
+const ideaInput = document.getElementById('ideaInput');
+const charCount = document.getElementById('charCount');
+ideaInput.addEventListener('input', () => {
+  const currentLength = ideaInput.value.length;
+  charCount.textContent = `${currentLength}/400`;
+  if(currentLength > 380) charCount.style.color = 'var(--amber)';
+  else charCount.style.color = 'var(--t3)';
+});
+
+// Copy Report Link
+function copyReport() {
+  const btn = document.querySelector('.report-actions .action-btn:nth-child(1)');
+  navigator.clipboard.writeText("Check out this market research for: " + window.currentIdea);
+  btn.textContent = "✅ Copied!";
+  setTimeout(() => btn.textContent = "📋 Copy Link", 2000);
+}
+
+// Dynamic Circular Score Visualizer
+function animateScore(score) {
+  const circle = document.getElementById('scoreCircle');
+  const numDisplay = document.getElementById('viabilityScore');
+  let color = score >= 80 ? '#2ECC8A' : score >= 50 ? '#C98A00' : '#E05555';
+  numDisplay.style.color = color;
+  
+  let currentScore = 0;
+  let interval = setInterval(() => {
+    if(currentScore >= score) {
+      clearInterval(interval);
+      if (score >= 80) triggerConfetti();
+    } else {
+      currentScore += 2; 
+      circle.style.background = `conic-gradient(${color} ${currentScore}%, var(--bg2) ${currentScore}%)`;
+    }
+  }, 20);
+}
+
+function triggerConfetti() {
+  confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#2ECC8A', '#1A8EC4', '#C98A00'] });
+}
+
+/* -------- helpers & Core Logic -------- */
+function setIdea(t){ document.getElementById('ideaInput').value = t; ideaInput.dispatchEvent(new Event('input')); }
 function resetApp(){
   document.getElementById('inputSection').style.display='block';
   document.getElementById('loadingState').classList.remove('active');
   document.getElementById('reportArea').classList.remove('active');
   document.getElementById('errorState').classList.remove('active');
   document.getElementById('analyzeBtn').disabled=false;
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
+
 let stepTimer;
 function animateSteps(){
   const steps=['step1','step2','step3','step4','step5'];
@@ -342,9 +408,13 @@ async function analyzeIdea(){
   document.getElementById('loadingState').classList.add('active');
   document.getElementById('errorState').classList.remove('active');
   document.getElementById('reportArea').classList.remove('active');
+  
+  // Reset Steps
+  document.querySelectorAll('.loading-step').forEach(el => { el.classList.remove('active'); el.classList.remove('done'); });
+  document.getElementById('step1').classList.add('active');
+  
   animateSteps();
 
-  // The frontend calls your serverless function at /api/analyze
   try {
     const resp = await fetch('/api/analyze', {
       method: 'POST',
@@ -357,7 +427,7 @@ async function analyzeIdea(){
       throw new Error(`Server error ${resp.status}: ${text}`);
     }
 
-    const report = await resp.json(); // server returns parsed JSON report object
+    const report = await resp.json(); 
     clearInterval(stepTimer);
     displayReport(report, idea);
 
@@ -375,8 +445,10 @@ function displayReport(r, idea){
   document.getElementById('loadingState').classList.remove('active');
   document.getElementById('reportArea').classList.add('active');
 
-  document.getElementById('reportTitle').textContent = (r.businessTitle || 'Market Research') + ' — Market Report';
+  // Trigger Score Animation
   document.getElementById('viabilityScore').textContent = r.viabilityScore ?? '--';
+  if(r.viabilityScore) animateScore(r.viabilityScore);
+
   document.getElementById('businessTitle').textContent = r.businessTitle || idea;
   document.getElementById('scoreVerdict').textContent = r.scoreVerdict || '';
 
@@ -389,7 +461,7 @@ function displayReport(r, idea){
   bars.innerHTML = (r.survey?.results || []).map(s=>`
     <div class="bar-row">
       <div class="bar-label">${s.label}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${s.percentage}%;background:var(--blue-light)"></div></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${s.percentage}%"></div></div>
       <div class="bar-val">${s.percentage}%</div>
     </div>`).join('');
   document.getElementById('surveyBody').textContent = r.survey?.keyFinding ? '💡 ' + r.survey.keyFinding : '';
@@ -429,39 +501,60 @@ function displayReport(r, idea){
   window.currentIdea = idea;
 }
 
-/* -------- download TXT -------- */
-function downloadReport(){
+/* -------- EXPORT TO PDF -------- */
+async function downloadReport() {
   const r = window.currentReport;
-  if(!r){ alert('No report to download'); return; }
-  const content = `PULSE MARKET RESEARCH REPORT
-${r.businessTitle}
-Generated: ${new Date().toLocaleDateString()}
-Viability Score: ${r.viabilityScore}/100
+  if(!r) { alert('No report to download'); return; }
 
-VERDICT: ${r.scoreVerdict}
+  const reportElement = document.getElementById('reportArea');
+  const actionButtons = document.querySelector('.report-actions');
+  const downloadBtn = actionButtons.children[1];
+  
+  const originalDisplay = actionButtons.style.display;
+  const originalText = downloadBtn.textContent;
+  
+  // Prep UI for capturing
+  actionButtons.style.display = 'none';
+  downloadBtn.textContent = "⏳ Generating PDF...";
 
-MARKET SIZE
-TAM: ${r.market?.tam} | SAM: ${r.market?.sam} | SOM: ${r.market?.som}
-${r.market?.summary || ''}
+  try {
+    const canvas = await html2canvas(reportElement, {
+      scale: 2, 
+      useCORS: true,
+      backgroundColor: '#0C0F14'
+    });
 
-COMPETITORS
-${r.competitors || ''}
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-PRICING STRATEGY
-${r.pricing || ''}
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    
+    let heightLeft = pdfHeight;
+    let position = 0;
 
-GO-TO-MARKET PLAN
-${r.gtm || ''}
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+    heightLeft -= pageHeight;
 
----
-Generated by Pulse · AI-powered market research
-All AI-generated content. Not financial advice.`;
+    while (heightLeft > 0) {
+      position = heightLeft - pdfHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+    }
 
-  const blob = new Blob([content], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `Pulse_Report_${(r.businessTitle||'report').replace(/\s+/g,'_')}.txt`;
-  a.click();
+    pdf.save(`Pulse_Report_${(r.businessTitle||'Idea').replace(/\s+/g,'_')}.pdf`);
+    
+  } catch (err) {
+    console.error("PDF generation failed", err);
+    alert('Failed to generate PDF. Please try again.');
+  } finally {
+    actionButtons.style.display = originalDisplay;
+    downloadBtn.textContent = originalText;
+  }
 }
 </script>
 </body>
