@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Pulse — AI Market Research</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
+/* (same CSS as your current file) */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg0:#0C0F14;--bg1:#111620;--bg2:#1A2030;--bg3:#212840;
@@ -136,6 +137,7 @@ nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding
 /* FOOTER */
 footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:1px solid rgba(255,255,255,0.04)}
 
+/* responsive */
 @media(max-width:600px){
   .hero h1{font-size:28px}
   .metric-grid{grid-template-columns:1fr}
@@ -201,7 +203,7 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
     <div class="report-title" id="reportTitle">Market Research Report</div>
     <div class="report-actions">
       <button class="action-btn" onclick="resetApp()">↩ New Analysis</button>
-      <button class="action-btn" onclick="downloadReport()">↓ Download PDF</button>
+      <button class="action-btn" onclick="downloadReport()">↓ Download TXT</button>
     </div>
   </div>
 
@@ -309,10 +311,8 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
 <footer>Pulse · AI-powered market research for small businesses · All AI-generated content is labelled · Not financial advice</footer>
 
 <script>
-const GEMINI_KEY = 'AIzaSyBo_zomW3E2IHQCYTibWbKtRl7I6FuZq_M';
-
-function setIdea(text){ document.getElementById('ideaInput').value = text; }
-
+/* -------- helpers & UI -------- */
+function setIdea(t){ document.getElementById('ideaInput').value = t; }
 function resetApp(){
   document.getElementById('inputSection').style.display='block';
   document.getElementById('loadingState').classList.remove('active');
@@ -320,19 +320,19 @@ function resetApp(){
   document.getElementById('errorState').classList.remove('active');
   document.getElementById('analyzeBtn').disabled=false;
 }
-
 let stepTimer;
 function animateSteps(){
   const steps=['step1','step2','step3','step4','step5'];
   let i=0;
   stepTimer=setInterval(()=>{
-    if(i>0) document.getElementById(steps[i-1]).classList.add('done');
-    if(i<steps.length) document.getElementById(steps[i]).classList.add('active');
+    if(i>0) document.getElementById(steps[i-1])?.classList.add('done');
+    if(i<steps.length) document.getElementById(steps[i])?.classList.add('active');
     i++;
     if(i>steps.length) clearInterval(stepTimer);
   },6000);
 }
 
+/* -------- main action (calls serverless function) -------- */
 async function analyzeIdea(){
   const idea = document.getElementById('ideaInput').value.trim();
   if(!idea){ alert('Please enter your business idea first!'); return; }
@@ -344,64 +344,20 @@ async function analyzeIdea(){
   document.getElementById('reportArea').classList.remove('active');
   animateSteps();
 
-  const prompt = `You are a world-class market research analyst at a Big 4 consulting firm. Analyse this business idea and return a JSON object ONLY — no markdown, no explanation, just raw JSON.
-
-Business idea: "${idea}"
-
-Return exactly this JSON structure:
-{
-  "viabilityScore": <number 0-100>,
-  "businessTitle": "<short name for this business>",
-  "scoreVerdict": "<one sentence verdict>",
-  "market": {
-    "tam": "<market size eg ₹8,400Cr>",
-    "sam": "<serviceable eg ₹620Cr>",
-    "som": "<realistic target eg ₹18Cr>",
-    "summary": "<2-3 sentences about market opportunity>"
-  },
-  "survey": {
-    "results": [
-      {"label": "<question label>", "percentage": <number>},
-      {"label": "<question label>", "percentage": <number>},
-      {"label": "<question label>", "percentage": <number>},
-      {"label": "<question label>", "percentage": <number>}
-    ],
-    "keyFinding": "<most important finding from survey>"
-  },
-  "competitors": "<detailed competitor analysis as text with top 4-5 competitors, their strengths and weaknesses>",
-  "personas": [
-    {"name": "<Name, Age>", "demo": "<city, job, income>", "desc": "<2 sentence description of this buyer>"},
-    {"name": "<Name, Age>", "demo": "<city, job, income>", "desc": "<2 sentence description>"},
-    {"name": "<Name, Age>", "demo": "<city, job, income>", "desc": "<2 sentence description>"}
-  ],
-  "trends": [
-    {"name": "<trend name>", "velocity": "<eg +142%>"},
-    {"name": "<trend name>", "velocity": "<eg +96%>"},
-    {"name": "<trend name>", "velocity": "<eg +67%>"},
-    {"name": "<trend name>", "velocity": "<eg +54%>"},
-    {"name": "<trend name>", "velocity": "<eg +38%>"}
-  ],
-  "pricing": "<detailed pricing strategy recommendation with specific price points and rationale>",
-  "experts": [
-    {"initials": "KS", "name": "Kunal Shah", "role": "D2C India · Consumer behaviour", "quote": "<2-3 sentence insight about this specific business from Kunal Shah perspective>"},
-    {"initials": "PG", "name": "Paul Graham", "role": "Startups · Validation", "quote": "<2-3 sentence insight from Paul Graham perspective>"},
-    {"initials": "SB", "name": "Sara Blakely", "role": "Bootstrapping · Product-market fit", "quote": "<2-3 sentence insight from Sara Blakely perspective>"}
-  ],
-  "gtm": "<detailed 90-day go-to-market plan with specific weekly actions>"
-}`;
-
+  // The frontend calls your serverless function at /api/analyze
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+    const resp = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ idea })
     });
 
-    if(!res.ok) throw new Error(`API error: ${res.status}`);
-    const data = await res.json();
-    let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/```json|```/g,'').trim();
-    const report = JSON.parse(text);
+    if(!resp.ok){
+      const text = await resp.text();
+      throw new Error(`Server error ${resp.status}: ${text}`);
+    }
+
+    const report = await resp.json(); // server returns parsed JSON report object
     clearInterval(stepTimer);
     displayReport(report, idea);
 
@@ -409,38 +365,39 @@ Return exactly this JSON structure:
     clearInterval(stepTimer);
     document.getElementById('loadingState').classList.remove('active');
     document.getElementById('errorState').classList.add('active');
-    document.getElementById('errorMsg').textContent = `Error: ${err.message}. Please check your API key and try again.`;
+    document.getElementById('errorMsg').textContent = `Error: ${err.message}.`;
     document.getElementById('analyzeBtn').disabled=false;
   }
 }
 
+/* -------- render report -------- */
 function displayReport(r, idea){
   document.getElementById('loadingState').classList.remove('active');
   document.getElementById('reportArea').classList.add('active');
 
-  document.getElementById('reportTitle').textContent = r.businessTitle + ' — Market Report';
-  document.getElementById('viabilityScore').textContent = r.viabilityScore;
-  document.getElementById('businessTitle').textContent = r.businessTitle;
-  document.getElementById('scoreVerdict').textContent = r.scoreVerdict;
+  document.getElementById('reportTitle').textContent = (r.businessTitle || 'Market Research') + ' — Market Report';
+  document.getElementById('viabilityScore').textContent = r.viabilityScore ?? '--';
+  document.getElementById('businessTitle').textContent = r.businessTitle || idea;
+  document.getElementById('scoreVerdict').textContent = r.scoreVerdict || '';
 
-  document.getElementById('tamVal').textContent = r.market.tam;
-  document.getElementById('samVal').textContent = r.market.sam;
-  document.getElementById('somVal').textContent = r.market.som;
-  document.getElementById('marketBody').textContent = r.market.summary;
+  document.getElementById('tamVal').textContent = r.market?.tam || '--';
+  document.getElementById('samVal').textContent = r.market?.sam || '--';
+  document.getElementById('somVal').textContent = r.market?.som || '--';
+  document.getElementById('marketBody').textContent = r.market?.summary || '';
 
   const bars = document.getElementById('surveyBars');
-  bars.innerHTML = r.survey.results.map(s=>`
+  bars.innerHTML = (r.survey?.results || []).map(s=>`
     <div class="bar-row">
       <div class="bar-label">${s.label}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${s.percentage}%;background:var(--blue-light)"></div></div>
       <div class="bar-val">${s.percentage}%</div>
     </div>`).join('');
-  document.getElementById('surveyBody').textContent = '💡 ' + r.survey.keyFinding;
+  document.getElementById('surveyBody').textContent = r.survey?.keyFinding ? '💡 ' + r.survey.keyFinding : '';
 
-  document.getElementById('competitorBody').textContent = r.competitors;
+  document.getElementById('competitorBody').textContent = r.competitors || '';
 
   const pg = document.getElementById('personaGrid');
-  pg.innerHTML = r.personas.map(p=>`
+  pg.innerHTML = (r.personas || []).map(p=>`
     <div class="persona-card">
       <div class="persona-name">${p.name}</div>
       <div class="persona-demo">${p.demo}</div>
@@ -448,16 +405,16 @@ function displayReport(r, idea){
     </div>`).join('');
 
   const tl = document.getElementById('trendList');
-  tl.innerHTML = r.trends.map(t=>`
+  tl.innerHTML = (r.trends || []).map(t=>`
     <div class="trend-item">
       <div class="trend-name">${t.name}</div>
       <div class="trend-vel">${t.velocity}</div>
     </div>`).join('');
 
-  document.getElementById('pricingBody').textContent = r.pricing;
+  document.getElementById('pricingBody').textContent = r.pricing || '';
 
   const el = document.getElementById('expertList');
-  el.innerHTML = r.experts.map(e=>`
+  el.innerHTML = (r.experts || []).map(e=>`
     <div class="expert-item">
       <div class="expert-header">
         <div class="expert-avatar">${e.initials}</div>
@@ -466,12 +423,13 @@ function displayReport(r, idea){
       <div class="expert-quote">"${e.quote}"</div>
     </div>`).join('');
 
-  document.getElementById('gtmBody').textContent = r.gtm;
+  document.getElementById('gtmBody').textContent = r.gtm || '';
 
   window.currentReport = r;
   window.currentIdea = idea;
 }
 
+/* -------- download TXT -------- */
 function downloadReport(){
   const r = window.currentReport;
   if(!r){ alert('No report to download'); return; }
@@ -483,17 +441,17 @@ Viability Score: ${r.viabilityScore}/100
 VERDICT: ${r.scoreVerdict}
 
 MARKET SIZE
-TAM: ${r.market.tam} | SAM: ${r.market.sam} | SOM: ${r.market.som}
-${r.market.summary}
+TAM: ${r.market?.tam} | SAM: ${r.market?.sam} | SOM: ${r.market?.som}
+${r.market?.summary || ''}
 
 COMPETITORS
-${r.competitors}
+${r.competitors || ''}
 
 PRICING STRATEGY
-${r.pricing}
+${r.pricing || ''}
 
 GO-TO-MARKET PLAN
-${r.gtm}
+${r.gtm || ''}
 
 ---
 Generated by Pulse · AI-powered market research
@@ -502,7 +460,7 @@ All AI-generated content. Not financial advice.`;
   const blob = new Blob([content], {type:'text/plain'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `Pulse_Report_${r.businessTitle.replace(/\s+/g,'_')}.txt`;
+  a.download = `Pulse_Report_${(r.businessTitle||'report').replace(/\s+/g,'_')}.txt`;
   a.click();
 }
 </script>
