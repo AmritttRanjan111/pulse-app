@@ -12,9 +12,9 @@ export default async function handler(req, res) {
 
     const API_KEY = process.env.GEMINI_API_KEY;
 
-    // Updated URL: Using v1beta and the direct model path
+    // CHANGED: Using 'gemini-flash-latest' which is the most reliable alias
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: {
@@ -49,16 +49,14 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // Catching specific Google API errors early
     if (data.error) {
       return res.status(data.error.code || 500).json({
         error: "Google API Error",
-        message: data.error.message,
-        details: data.error.status
+        message: data.error.message
       });
     }
 
-    if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts) {
+    if (!data.candidates || data.candidates.length === 0) {
       return res.status(500).json({
         error: "No response from AI",
         full: data
@@ -71,7 +69,7 @@ export default async function handler(req, res) {
     try {
       parsed = JSON.parse(text);
     } catch (e) {
-      // Fallback: If it still returns markdown triple backticks, strip them
+      // Clean backticks just in case
       const cleanedText = text.replace(/```json|```/g, '').trim();
       parsed = JSON.parse(cleanedText);
     }
