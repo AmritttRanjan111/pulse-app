@@ -1,30 +1,510 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Pulse App</title>
-</head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pulse — AI Market Research</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#0C0F14;--bg1:#111620;--bg2:#1A2030;--bg3:#212840;
+  --t1:#F0F2F5;--t2:#8A92A0;--t3:#4A5260;
+  --blue:#0F6E9A;--blue-light:#1A8EC4;--blue-bg:rgba(15,110,154,0.15);
+  --amber:#C98A00;--amber-bg:rgba(201,138,0,0.12);--amber-border:rgba(201,138,0,0.3);
+  --success:#1A7A4A;--success-bg:rgba(26,122,74,0.15);
+  --danger:#A33030;--danger-bg:rgba(163,48,48,0.15);
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+html,body{height:100%;background:var(--bg0);color:var(--t1);font-family:var(--font);font-size:14px;line-height:1.6}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
 
+/* NAV */
+nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:18px;font-weight:600;letter-spacing:-0.5px;color:var(--t1)}
+.logo span{color:var(--blue-light)}
+.nav-badge{font-size:11px;background:var(--blue-bg);color:var(--blue-light);padding:3px 10px;border-radius:20px;border:1px solid rgba(15,110,154,0.3)}
+
+/* HERO */
+.hero{text-align:center;padding:80px 32px 60px;max-width:720px;margin:0 auto}
+.hero-eyebrow{font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';flex:1;max-width:40px;height:1px;background:var(--amber-border)}
+.hero h1{font-size:42px;font-weight:600;letter-spacing:-1.5px;line-height:1.15;margin-bottom:16px;color:var(--t1)}
+.hero h1 span{color:var(--blue-light)}
+.hero p{font-size:16px;color:var(--t2);line-height:1.7;max-width:480px;margin:0 auto 40px}
+
+/* INPUT AREA */
+.input-card{background:var(--bg1);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px;max-width:720px;margin:0 auto 32px}
+.input-label{font-size:12px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px}
+.idea-input{width:100%;background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;font-size:15px;color:var(--t1);font-family:var(--font);resize:vertical;min-height:80px;outline:none;transition:border-color 0.2s}
+.idea-input:focus{border-color:var(--blue)}
+.idea-input::placeholder{color:var(--t3)}
+.input-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:gap}
+.input-hints{display:flex;gap:8px;flex-wrap:wrap}
+.hint-pill{background:var(--bg2);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--t3);cursor:pointer;transition:all 0.15s}
+.hint-pill:hover{border-color:var(--blue);color:var(--blue-light)}
+.analyze-btn{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.analyze-btn:hover{background:var(--blue-light)}
+.analyze-btn:disabled{opacity:0.5;cursor:not-allowed}
+.analyze-btn .btn-icon{font-size:16px}
+
+/* LOADING */
+.loading-state{display:none;text-align:center;padding:48px 32px;max-width:720px;margin:0 auto}
+.loading-state.active{display:block}
+.loading-spinner{width:40px;height:40px;border:2px solid rgba(255,255,255,0.08);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-steps{display:flex;flex-direction:column;gap:8px;max-width:320px;margin:20px auto 0}
+.loading-step{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:13px;color:var(--t3);transition:all 0.3s}
+.loading-step.active{background:var(--blue-bg);color:var(--blue-light)}
+.loading-step.done{color:var(--success)}
+.step-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* REPORT */
+.report-area{display:none;max-width:720px;margin:0 auto;padding:0 32px 60px}
+.report-area.active{display:block}
+.report-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.report-title{font-size:20px;font-weight:600;letter-spacing:-0.3px}
+.report-actions{display:flex;gap:8px}
+.action-btn{background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 16px;font-size:13px;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all 0.15s;display:flex;align-items:center;gap:6px}
+.action-btn:hover{border-color:var(--blue);color:var(--blue-light)}
+
+/* SCORE BADGE */
+.score-row{display:flex;align-items:center;gap:16px;background:var(--bg1);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px 20px;margin-bottom:20px}
+.score-circle{width:56px;height:56px;border-radius:50%;border:2px solid var(--success);background:var(--success-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.score-num{font-size:20px;font-weight:600;color:#2ECC8A;line-height:1;font-family:var(--mono)}
+.score-lbl{font-size:9px;color:#2ECC8A;text-transform:uppercase;letter-spacing:0.05em}
+.score-info{flex:1}
+.score-business{font-size:15px;font-weight:500;margin-bottom:3px}
+.score-verdict{font-size:12px;color:var(--t2)}
+
+/* SECTION CARDS */
+.section-card{background:var(--bg1);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px}
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.si-blue{background:var(--blue-bg)}
+.si-amber{background:var(--amber-bg)}
+.si-green{background:var(--success-bg)}
+.section-title{font-size:13px;font-weight:500;color:var(--t1)}
+.ai-tag{font-size:10px;background:var(--amber-bg);color:var(--amber);padding:2px 7px;border-radius:4px;border:1px solid var(--amber-border);font-weight:500;margin-left:auto}
+.real-tag{font-size:10px;background:var(--success-bg);color:#2ECC8A;padding:2px 7px;border-radius:4px;border:1px solid rgba(26,122,74,0.3);font-weight:500;margin-left:auto}
+.section-body{font-size:13px;color:var(--t2);line-height:1.75;white-space:pre-wrap}
+
+/* MARKET METRICS */
+.metric-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.metric-box{background:var(--bg2);border-radius:8px;padding:12px;text-align:center}
+.metric-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px}
+.metric-value{font-size:18px;font-weight:600;color:var(--t1);font-family:var(--mono)}
+.metric-sub{font-size:11px;color:var(--t3);margin-top:2px}
+
+/* BAR CHART */
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bar-label{font-size:12px;color:var(--t2);width:140px;flex-shrink:0}
+.bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+.bar-val{font-size:11px;color:var(--t3);width:32px;text-align:right;font-family:var(--mono)}
+
+/* EXPERT */
+.expert-item{background:var(--bg2);border-radius:8px;padding:12px;margin-bottom:8px}
+.expert-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.expert-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue-bg);border:1px solid rgba(15,110,154,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--blue-light)}
+.expert-name{font-size:12px;font-weight:500;color:var(--t1)}
+.expert-role{font-size:11px;color:var(--t3)}
+.expert-quote{font-size:12px;color:var(--t2);line-height:1.6;font-style:italic;padding-left:10px;border-left:2px solid rgba(15,110,154,0.4)}
+
+/* DISCLAIMER */
+.disclaimer{background:rgba(201,138,0,0.06);border:1px solid var(--amber-border);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--amber);margin-top:12px;line-height:1.5}
+
+/* TREND */
+.trend-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.trend-item:last-child{border-bottom:none}
+.trend-name{flex:1;font-size:12px;color:var(--t1)}
+.trend-vel{font-size:11px;color:#2ECC8A;font-family:var(--mono);font-weight:500}
+
+/* PERSONA */
+.persona-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.persona-card{background:var(--bg2);border-radius:8px;padding:10px}
+.persona-name{font-size:12px;font-weight:500;color:var(--t1);margin-bottom:2px}
+.persona-demo{font-size:11px;color:var(--t3);margin-bottom:6px}
+.persona-desc{font-size:11px;color:var(--t2);line-height:1.5}
+
+/* ERROR */
+.error-state{display:none;text-align:center;padding:32px;max-width:720px;margin:0 auto}
+.error-state.active{display:block}
+.error-box{background:var(--danger-bg);border:1px solid rgba(163,48,48,0.3);border-radius:12px;padding:20px;font-size:13px;color:#E05555}
+
+/* FOOTER */
+footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:1px solid rgba(255,255,255,0.04)}
+
+@media(max-width:600px){
+  .hero h1{font-size:28px}
+  .metric-grid{grid-template-columns:1fr}
+  .persona-grid{grid-template-columns:1fr}
+  .input-footer{flex-direction:column;align-items:stretch}
+  .analyze-btn{justify-content:center}
+}
+</style>
+</head>
 <body>
 
-  <h1>Pulse is Running 🚀 v4</h1>
+<nav>
+  <div class="logo"><span>Pulse</span> — Market Intelligence</div>
+  <div class="nav-badge">AI Powered · Free</div>
+</nav>
 
-  <input type="text" id="ideaInput" placeholder="Enter your business idea" />
-  <button onclick="analyzeIdea()">Analyze</button>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">For Small Businesses & Freelancers</div>
+  <h1>Market research that used to cost <span>₹50,000</span> — now free</h1>
+  <p>Type your business idea. Get a full market research report in 60 seconds — market size, competitors, customer personas, pricing strategy and more.</p>
+</div>
 
-  <p id="result"></p>
+<!-- INPUT -->
+<div class="input-card" id="inputSection">
+  <div class="input-label">Describe your business idea</div>
+  <textarea class="idea-input" id="ideaInput" placeholder="eg. A monthly subscription box delivering 4 premium craft coffees from Indian roasters to customers across India for ₹999/month"></textarea>
+  <div class="input-footer" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;gap:12px;flex-wrap:wrap">
+    <div class="input-hints">
+      <div class="hint-pill" onclick="setIdea('Cloud kitchen for healthy tiffin service in Pune targeting working professionals')">Tiffin service</div>
+      <div class="hint-pill" onclick="setIdea('Online tutoring platform for Class 10-12 students in India focused on Maths and Science')">EdTech tutoring</div>
+      <div class="hint-pill" onclick="setIdea('Handmade organic skincare products targeting urban women aged 25-40 in India')">Skincare brand</div>
+    </div>
+    <button class="analyze-btn" id="analyzeBtn" onclick="analyzeIdea()">
+      <span class="btn-icon">◆</span> Generate Report
+    </button>
+  </div>
+</div>
 
-  <script>
-    async function analyzeIdea() {
-      const idea = document.getElementById("ideaInput").value;
+<!-- LOADING -->
+<div class="loading-state" id="loadingState">
+  <div class="loading-spinner"></div>
+  <p style="color:var(--t2);font-size:14px;margin-bottom:8px">Pulse is analysing your idea...</p>
+  <p style="color:var(--t3);font-size:12px">Usually takes 30–60 seconds</p>
+  <div class="loading-steps">
+    <div class="loading-step active" id="step1"><div class="step-dot"></div>Fetching real market data</div>
+    <div class="loading-step" id="step2"><div class="step-dot"></div>Running synthetic survey (500 responses)</div>
+    <div class="loading-step" id="step3"><div class="step-dot"></div>Mapping competitor landscape</div>
+    <div class="loading-step" id="step4"><div class="step-dot"></div>Applying expert lenses</div>
+    <div class="loading-step" id="step5"><div class="step-dot"></div>Compiling full report</div>
+  </div>
+</div>
 
-      document.getElementById("result").innerText = "Analyzing...";
+<!-- ERROR -->
+<div class="error-state" id="errorState">
+  <div class="error-box" id="errorMsg">Something went wrong. Please try again.</div>
+  <button class="analyze-btn" style="margin:16px auto 0" onclick="resetApp()">Try Again</button>
+</div>
 
-      setTimeout(() => {
-        document.getElementById("result").innerText =
-          "AI says: This idea has potential 🚀";
-      }, 1000);
-    }
-  </script>
+<!-- REPORT -->
+<div class="report-area" id="reportArea">
+  <div class="report-header">
+    <div class="report-title" id="reportTitle">Market Research Report</div>
+    <div class="report-actions">
+      <button class="action-btn" onclick="resetApp()">↩ New Analysis</button>
+      <button class="action-btn" onclick="downloadReport()">↓ Download PDF</button>
+    </div>
+  </div>
 
+  <!-- SCORE -->
+  <div class="score-row">
+    <div class="score-circle">
+      <div class="score-num" id="viabilityScore">--</div>
+      <div class="score-lbl">Score</div>
+    </div>
+    <div class="score-info">
+      <div class="score-business" id="businessTitle">Analysing...</div>
+      <div class="score-verdict" id="scoreVerdict">AI-generated market intelligence report</div>
+    </div>
+  </div>
+
+  <!-- MARKET SIZE -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon si-blue">📐</div>
+      <div class="section-title">Market Size Estimate</div>
+      <div class="real-tag">Real Data</div>
+    </div>
+    <div class="metric-grid" id="marketMetrics">
+      <div class="metric-box"><div class="metric-label">TAM</div><div class="metric-value" id="tamVal">--</div><div class="metric-sub">Total market</div></div>
+      <div class="metric-box"><div class="metric-label">SAM</div><div class="metric-value" id="samVal">--</div><div class="metric-sub">Serviceable</div></div>
+      <div class="metric-box"><div class="metric-label">SOM</div><div class="metric-value" id="somVal">--</div><div class="metric-sub">Your target</div></div>
+    </div>
+    <div class="section-body" id="marketBody"></div>
+  </div>
+
+  <!-- SURVEY -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon si-amber">🧪</div>
+      <div class="section-title">Synthetic Consumer Survey — 500 Responses</div>
+      <div class="ai-tag">AI Synthetic</div>
+    </div>
+    <div id="surveyBars" style="margin-bottom:10px"></div>
+    <div class="section-body" id="surveyBody"></div>
+  </div>
+
+  <!-- COMPETITORS -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon si-blue">🔭</div>
+      <div class="section-title">Competitor Landscape</div>
+      <div class="ai-tag">AI Synthetic</div>
+    </div>
+    <div class="section-body" id="competitorBody"></div>
+  </div>
+
+  <!-- PERSONAS -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon si-green">👤</div>
+      <div class="section-title">Customer Personas</div>
+      <div class="ai-tag">AI Synthetic</div>
+    </div>
+    <div class="persona-grid" id="personaGrid"></div>
+  </div>
+
+  <!-- TRENDS -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon si-blue">📈</div>
+      <div class="section-title">Rising Industry Trends</div>
+      <div class="ai-tag">AI Synthetic</div>
+    </div>
+    <div id="trendList"></div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon si-amber">💰</div>
+      <div class="section-title">Pricing Strategy</div>
+      <div class="ai-tag">AI Synthetic</div>
+    </div>
+    <div class="section-body" id="pricingBody"></div>
+  </div>
+
+  <!-- EXPERT LENSES -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon si-amber">◆</div>
+      <div class="section-title">Expert Lenses</div>
+      <div class="ai-tag">AI Persona</div>
+    </div>
+    <div id="expertList"></div>
+    <div class="disclaimer">These are AI-generated perspectives based on public information and known philosophies of these individuals. This does not represent real advice from them.</div>
+  </div>
+
+  <!-- GTM -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-icon si-green">🗓️</div>
+      <div class="section-title">90-Day Go-To-Market Plan</div>
+      <div class="ai-tag">AI Synthetic</div>
+    </div>
+    <div class="section-body" id="gtmBody"></div>
+  </div>
+
+</div>
+
+<footer>Pulse · AI-powered market research for small businesses · All AI-generated content is labelled · Not financial advice</footer>
+
+<script>
+const GEMINI_KEY = 'AIzaSyBo_zomW3E2IHQCYTibWbKtRl7I6FuZq_M';
+
+function setIdea(text){ document.getElementById('ideaInput').value = text; }
+
+function resetApp(){
+  document.getElementById('inputSection').style.display='block';
+  document.getElementById('loadingState').classList.remove('active');
+  document.getElementById('reportArea').classList.remove('active');
+  document.getElementById('errorState').classList.remove('active');
+  document.getElementById('analyzeBtn').disabled=false;
+}
+
+let stepTimer;
+function animateSteps(){
+  const steps=['step1','step2','step3','step4','step5'];
+  let i=0;
+  stepTimer=setInterval(()=>{
+    if(i>0) document.getElementById(steps[i-1]).classList.add('done');
+    if(i<steps.length) document.getElementById(steps[i]).classList.add('active');
+    i++;
+    if(i>steps.length) clearInterval(stepTimer);
+  },6000);
+}
+
+async function analyzeIdea(){
+  const idea = document.getElementById('ideaInput').value.trim();
+  if(!idea){ alert('Please enter your business idea first!'); return; }
+
+  document.getElementById('analyzeBtn').disabled=true;
+  document.getElementById('inputSection').style.display='none';
+  document.getElementById('loadingState').classList.add('active');
+  document.getElementById('errorState').classList.remove('active');
+  document.getElementById('reportArea').classList.remove('active');
+  animateSteps();
+
+  const prompt = `You are a world-class market research analyst at a Big 4 consulting firm. Analyse this business idea and return a JSON object ONLY — no markdown, no explanation, just raw JSON.
+
+Business idea: "${idea}"
+
+Return exactly this JSON structure:
+{
+  "viabilityScore": <number 0-100>,
+  "businessTitle": "<short name for this business>",
+  "scoreVerdict": "<one sentence verdict>",
+  "market": {
+    "tam": "<market size eg ₹8,400Cr>",
+    "sam": "<serviceable eg ₹620Cr>",
+    "som": "<realistic target eg ₹18Cr>",
+    "summary": "<2-3 sentences about market opportunity>"
+  },
+  "survey": {
+    "results": [
+      {"label": "<question label>", "percentage": <number>},
+      {"label": "<question label>", "percentage": <number>},
+      {"label": "<question label>", "percentage": <number>},
+      {"label": "<question label>", "percentage": <number>}
+    ],
+    "keyFinding": "<most important finding from survey>"
+  },
+  "competitors": "<detailed competitor analysis as text with top 4-5 competitors, their strengths and weaknesses>",
+  "personas": [
+    {"name": "<Name, Age>", "demo": "<city, job, income>", "desc": "<2 sentence description of this buyer>"},
+    {"name": "<Name, Age>", "demo": "<city, job, income>", "desc": "<2 sentence description>"},
+    {"name": "<Name, Age>", "demo": "<city, job, income>", "desc": "<2 sentence description>"}
+  ],
+  "trends": [
+    {"name": "<trend name>", "velocity": "<eg +142%>"},
+    {"name": "<trend name>", "velocity": "<eg +96%>"},
+    {"name": "<trend name>", "velocity": "<eg +67%>"},
+    {"name": "<trend name>", "velocity": "<eg +54%>"},
+    {"name": "<trend name>", "velocity": "<eg +38%>"}
+  ],
+  "pricing": "<detailed pricing strategy recommendation with specific price points and rationale>",
+  "experts": [
+    {"initials": "KS", "name": "Kunal Shah", "role": "D2C India · Consumer behaviour", "quote": "<2-3 sentence insight about this specific business from Kunal Shah perspective>"},
+    {"initials": "PG", "name": "Paul Graham", "role": "Startups · Validation", "quote": "<2-3 sentence insight from Paul Graham perspective>"},
+    {"initials": "SB", "name": "Sara Blakely", "role": "Bootstrapping · Product-market fit", "quote": "<2-3 sentence insight from Sara Blakely perspective>"}
+  ],
+  "gtm": "<detailed 90-day go-to-market plan with specific weekly actions>"
+}`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+    });
+
+    if(!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    let text = data.candidates[0].content.parts[0].text;
+    text = text.replace(/```json|```/g,'').trim();
+    const report = JSON.parse(text);
+    clearInterval(stepTimer);
+    displayReport(report, idea);
+
+  } catch(err){
+    clearInterval(stepTimer);
+    document.getElementById('loadingState').classList.remove('active');
+    document.getElementById('errorState').classList.add('active');
+    document.getElementById('errorMsg').textContent = `Error: ${err.message}. Please check your API key and try again.`;
+    document.getElementById('analyzeBtn').disabled=false;
+  }
+}
+
+function displayReport(r, idea){
+  document.getElementById('loadingState').classList.remove('active');
+  document.getElementById('reportArea').classList.add('active');
+
+  document.getElementById('reportTitle').textContent = r.businessTitle + ' — Market Report';
+  document.getElementById('viabilityScore').textContent = r.viabilityScore;
+  document.getElementById('businessTitle').textContent = r.businessTitle;
+  document.getElementById('scoreVerdict').textContent = r.scoreVerdict;
+
+  document.getElementById('tamVal').textContent = r.market.tam;
+  document.getElementById('samVal').textContent = r.market.sam;
+  document.getElementById('somVal').textContent = r.market.som;
+  document.getElementById('marketBody').textContent = r.market.summary;
+
+  const bars = document.getElementById('surveyBars');
+  bars.innerHTML = r.survey.results.map(s=>`
+    <div class="bar-row">
+      <div class="bar-label">${s.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${s.percentage}%;background:var(--blue-light)"></div></div>
+      <div class="bar-val">${s.percentage}%</div>
+    </div>`).join('');
+  document.getElementById('surveyBody').textContent = '💡 ' + r.survey.keyFinding;
+
+  document.getElementById('competitorBody').textContent = r.competitors;
+
+  const pg = document.getElementById('personaGrid');
+  pg.innerHTML = r.personas.map(p=>`
+    <div class="persona-card">
+      <div class="persona-name">${p.name}</div>
+      <div class="persona-demo">${p.demo}</div>
+      <div class="persona-desc">${p.desc}</div>
+    </div>`).join('');
+
+  const tl = document.getElementById('trendList');
+  tl.innerHTML = r.trends.map(t=>`
+    <div class="trend-item">
+      <div class="trend-name">${t.name}</div>
+      <div class="trend-vel">${t.velocity}</div>
+    </div>`).join('');
+
+  document.getElementById('pricingBody').textContent = r.pricing;
+
+  const el = document.getElementById('expertList');
+  el.innerHTML = r.experts.map(e=>`
+    <div class="expert-item">
+      <div class="expert-header">
+        <div class="expert-avatar">${e.initials}</div>
+        <div><div class="expert-name">${e.name}</div><div class="expert-role">${e.role}</div></div>
+      </div>
+      <div class="expert-quote">"${e.quote}"</div>
+    </div>`).join('');
+
+  document.getElementById('gtmBody').textContent = r.gtm;
+
+  window.currentReport = r;
+  window.currentIdea = idea;
+}
+
+function downloadReport(){
+  const r = window.currentReport;
+  if(!r){ alert('No report to download'); return; }
+  const content = `PULSE MARKET RESEARCH REPORT
+${r.businessTitle}
+Generated: ${new Date().toLocaleDateString()}
+Viability Score: ${r.viabilityScore}/100
+
+VERDICT: ${r.scoreVerdict}
+
+MARKET SIZE
+TAM: ${r.market.tam} | SAM: ${r.market.sam} | SOM: ${r.market.som}
+${r.market.summary}
+
+COMPETITORS
+${r.competitors}
+
+PRICING STRATEGY
+${r.pricing}
+
+GO-TO-MARKET PLAN
+${r.gtm}
+
+---
+Generated by Pulse · AI-powered market research
+All AI-generated content. Not financial advice.`;
+
+  const blob = new Blob([content], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Pulse_Report_${r.businessTitle.replace(/\s+/g,'_')}.txt`;
+  a.click();
+}
+</script>
 </body>
 </html>
