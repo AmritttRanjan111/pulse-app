@@ -233,7 +233,15 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
       <button class="action-btn primary-btn" onclick="resetApp()">↩ Edit Idea</button>
     </div>
   </div>
-
+<div class="section-card fade-up" style="animation-delay: 0.05s; padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <div style="font-size: 12px; color: var(--t2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Verified Sources Used:</div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="dataSourceBadges">
+      <span class="hint-pill" style="pointer-events: none; border-color: var(--blue); color: var(--blue-light);">📡 Reddit API</span>
+      <span class="hint-pill" style="pointer-events: none; border-color: var(--success); color: #2ECC8A;">📈 Google Trends API</span>
+      <span class="hint-pill" style="pointer-events: none; border-color: var(--amber); color: var(--amber);">📰 NewsAPI</span>
+      <span class="hint-pill" style="pointer-events: none; border-color: var(--t3); color: var(--t2);">📊 World Bank (Macro)</span>
+    </div>
+  </div>
   <div class="section-card fade-up" style="animation-delay: 0.1s;">
     <div class="section-head">
       <div class="section-icon si-blue">📐</div>
