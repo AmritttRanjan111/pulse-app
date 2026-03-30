@@ -10,26 +10,45 @@ export default async function handler(req, res) {
     const serperKey = process.env.SERPER_API_KEY; 
     const alphaVantageKey = process.env.ALPHA_VANTAGE_KEY; 
 
-    const getKw = (num) => encodeURIComponent(idea.split(' ').slice(0, num).join(' '));
-    const rawKw = idea.split(' ').slice(0, 2).join(' ');
+    // =======================================================================
+    // 🧠 1. AI PRE-FLIGHT (Smart Keyword Extraction)
+    // =======================================================================
+    // We use Gemini to pull exactly what we need for the APIs so they don't fail.
+    const kwResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
+      method: "POST", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ 
+          parts: [{ 
+            text: `Extract 2 short search phrases from this idea. Phrase 1: The core product/industry (e.g. 'EV battery swap'). Phrase 2: The location or target market (e.g. 'Bangalore auto'). Idea: ${idea}. Return ONLY a comma-separated string.` 
+          }] 
+        }]
+      })
+    });
+    
+    const kwData = await kwResponse.json();
+    const extractedKws = kwData.candidates?.[0]?.content?.parts?.[0]?.text?.split(',') || ['startup', 'business'];
+    
+    const term1 = encodeURIComponent(extractedKws[0]?.trim() || idea.split(' ')[0]);
+    const term2 = encodeURIComponent(extractedKws[1]?.trim() || idea.split(' ')[1]);
+    const broadTopic = extractedKws[0]?.trim() || "startup";
 
     // =======================================================================
-    // THE 12-SOURCE DATA ENGINE (All Parallel)
+    // 🌍 2. THE 12-SOURCE DATA ENGINE (All Parallel)
     // =======================================================================
-    
-    const fetchReddit = async () => { try { const r = await fetch(`https://www.reddit.com/search.json?q=${getKw(3)}&limit=3`); const d = await r.json(); return "Reddit Chatter: " + d.data.children.map(c => c.data.title).join(" | "); } catch(e) { return ""; } };
+    const fetchReddit = async () => { try { const r = await fetch(`https://www.reddit.com/search.json?q=${term1} OR ${term2}&limit=5`); const d = await r.json(); return "Reddit Chatter: " + d.data.children.map(c => c.data.title).join(" | "); } catch(e) { return ""; } };
     const fetchWorldBank = async () => { try { const r = await fetch('https://api.worldbank.org/v2/country/IND/indicator/NY.GDP.PCAP.CD?format=json&mrnev=1'); const d = await r.json(); return `India GDP/Capita: $${Math.round(d[1][0].value)}`; } catch(e) { return ""; } };
-    const fetchNews = async () => { try { if(!newsKey) return ""; const r = await fetch(`https://newsapi.org/v2/everything?q=${getKw(2)}&pageSize=3&language=en&apiKey=${newsKey}`); const d = await r.json(); return "News: " + d.articles.map(a => a.title).join(" | "); } catch(e) { return ""; } };
+    const fetchNews = async () => { try { if(!newsKey) return ""; const r = await fetch(`https://newsapi.org/v2/everything?q=${term1}&pageSize=3&language=en&apiKey=${newsKey}`); const d = await r.json(); return "News: " + d.articles.map(a => a.title).join(" | "); } catch(e) { return ""; } };
     const fetchCountry = async () => { try { const r = await fetch('https://restcountries.com/v3.1/name/india'); const d = await r.json(); return `India Pop: ${d[0].population}`; } catch(e) { return ""; } };
-    const fetchFinance = async () => { try { const r = await fetch(`https://api.coingecko.com/api/v3/search?query=${getKw(1)}`); const d = await r.json(); return d.coins.length > 0 ? `Crypto/Tech Signal: ${d.coins[0].name}` : ""; } catch(e) { return ""; } };
-    const fetchClimate = async () => { try { const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=18.52&longitude=73.85&current_weather=true`); const d = await r.json(); return `Local Temp Context (Pune): ${d.current_weather.temperature}°C`; } catch(e) { return ""; } };
+    const fetchFinance = async () => { try { const r = await fetch(`https://api.coingecko.com/api/v3/search?query=${term1}`); const d = await r.json(); return d.coins.length > 0 ? `Crypto/Tech Signal: ${d.coins[0].name}` : ""; } catch(e) { return ""; } };
+    const fetchClimate = async () => { try { const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=18.52&longitude=73.85&current_weather=true`); const d = await r.json(); return `Local Temp Context: ${d.current_weather.temperature}°C`; } catch(e) { return ""; } };
     
     const fetchSerper = async () => { 
       try { 
         if(!serperKey) return ""; 
         const r = await fetch('https://google.serper.dev/search', {
           method: 'POST', headers: { 'X-API-KEY': serperKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: `competitors for ${rawKw} startup india`, num: 3 })
+          body: JSON.stringify({ q: `top competitors for ${broadTopic} in ${decodeURIComponent(term2)}`, num: 3 })
         });
         const d = await r.json(); 
         return "LIVE COMPETITORS (Google): " + d.organic.map(o => o.title).join(" | "); 
@@ -38,7 +57,7 @@ export default async function handler(req, res) {
 
     const fetchAppStore = async () => { 
       try { 
-        const r = await fetch(`https://itunes.apple.com/search?term=${getKw(2)}&entity=software&limit=2`); 
+        const r = await fetch(`https://itunes.apple.com/search?term=${term1}&entity=software&limit=2`); 
         const d = await r.json(); 
         return d.results.length > 0 ? "APP STORE PRESENCE: " + d.results.map(a => a.trackName).join(", ") : "APP STORE: No major direct apps found."; 
       } catch(e) { return ""; } 
@@ -46,7 +65,7 @@ export default async function handler(req, res) {
 
     const fetchWiki = async () => { 
       try { 
-        const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${getKw(1)}`); 
+        const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${term1}`); 
         const d = await r.json(); 
         return "WIKIPEDIA CONTEXT: " + (d.extract ? d.extract.substring(0, 150) : ""); 
       } catch(e) { return ""; } 
@@ -67,14 +86,13 @@ export default async function handler(req, res) {
 
     const fetchTrends = () => "SEARCH TRENDS: 18% YoY Growth in this sector.";
 
-    // 🔥 EXECUTE ALL 12 APIS AT THE EXACT SAME TIME 🔥
+    // EXECUTE ALL 12 APIS AT THE EXACT SAME TIME
     const results = await Promise.allSettled([
       fetchReddit(), fetchWorldBank(), fetchNews(), fetchCountry(), 
       fetchFinance(), fetchClimate(), fetchSerper(), fetchAppStore(), 
       fetchWiki(), fetchAlpha(), fetchMap()
     ]);
     
-    // Save the raw data cleanly into an object so we can send it to the frontend
     const rawSources = {
       reddit: results[0].status === 'fulfilled' ? results[0].value : "No Reddit data found.",
       worldBank: results[1].status === 'fulfilled' ? results[1].value : "No macro economic data found.",
@@ -93,7 +111,7 @@ export default async function handler(req, res) {
     const contextStrings = Object.values(rawSources).filter(v => v !== "" && !v.includes("No ")).join("\n");
 
     // =======================================================================
-    // THE AI PROMPT (Using Gemini 2.5 Flash for speed & stability)
+    // 🧠 3. THE MAIN AI PROMPT (Strict Consultant Rules)
     // =======================================================================
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
@@ -103,18 +121,20 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `You are a Tier-1 Market Research AI. You must synthesize the following 12 streams of live web data to analyze this business idea.
+              text: `You are a Tier-1 Market Research AI. Synthesize the following 12 streams of live web data to analyze this business idea.
               
               IDEA: ${idea}
               
               LIVE DATA STREAMS:
               ${contextStrings}
               
-              CRITICAL RULES:
-              1. DO NOT guess competitors. Use the "LIVE COMPETITORS (Google)" and "APP STORE PRESENCE" data provided above.
-              2. YOU MUST PROVIDE A NUMERICAL ESTIMATE for TAM, SAM, and SOM (e.g., $5B, ₹500 Cr). Even if exact raw data is missing or returns 0, use your general knowledge and logical deduction to provide a realistic rough estimate. NEVER say "impossible to calculate", "unknown", or write long sentences in the TAM/SAM/SOM fields. 
-              3. Incorporate the "Reddit Chatter" as exact pain points for the Customer Personas.
-              4. Make the Expert quotes highly specific to the data provided.
+              CRITICAL RULES FOR GENERATION:
+              1. COMPETITORS: DO NOT guess competitors. Use the "LIVE COMPETITORS (Google)" and "APP STORE PRESENCE" data provided above. If it lists software/SaaS for a physical business, ignore it and name 3 REAL-WORLD companies in that specific local industry.
+              2. MACRO DATA LIMITS: You will see macro data (Temperature, GDP). ONLY use this if it directly impacts the business model. DO NOT repeat the exact same data point in multiple sections.
+              3. TONE: Write like a top-tier management consultant. Be concise, objective, and analytical. Avoid generic fluff.
+              4. TAM/SAM/SOM: YOU MUST PROVIDE A NUMERICAL ESTIMATE (e.g., $5B, ₹500 Cr). Even if exact raw data is missing, use logical deduction. NEVER say "impossible to calculate" or write long sentences here.
+              5. PERSONAS & QUOTES: Incorporate the "Reddit Chatter" as exact pain points for the Customer Personas. Make the Expert quotes highly specific to the provided data.
+              6. SURVEY DATA: When generating the synthetic survey, include the specific demographic or use-case in the label. Instead of "Would switch", write "Fleet owners willing to switch".
 
               RETURN VALID JSON ONLY EXACTLY LIKE THIS STRUCTURE:
               {
@@ -137,7 +157,7 @@ export default async function handler(req, res) {
               }`
             }]
           }],
-          generationConfig: { response_mime_type: "application/json", temperature: 0.8, topP: 0.95 }
+          generationConfig: { response_mime_type: "application/json", temperature: 0.7, topP: 0.95 }
         })
       }
     );
@@ -161,7 +181,7 @@ export default async function handler(req, res) {
       parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
     }
 
-    // 🔥 INJECT THE RAW SOURCES INTO THE FINAL RESPONSE 🔥
+    // INJECT THE RAW SOURCES INTO THE FINAL RESPONSE FOR THE FRONTEND
     parsed.rawSources = rawSources;
 
     return res.status(200).json(parsed);
