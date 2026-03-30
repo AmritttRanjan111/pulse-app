@@ -7,8 +7,8 @@ export default async function handler(req, res) {
     // API KEYS
     const API_KEY = process.env.GEMINI_API_KEY;
     const newsKey = process.env.NEWS_API_KEY;
-    const serperKey = process.env.SERPER_API_KEY; // NEW
-    const alphaVantageKey = process.env.ALPHA_VANTAGE_KEY; // NEW
+    const serperKey = process.env.SERPER_API_KEY; 
+    const alphaVantageKey = process.env.ALPHA_VANTAGE_KEY; 
 
     const getKw = (num) => encodeURIComponent(idea.split(' ').slice(0, num).join(' '));
     const rawKw = idea.split(' ').slice(0, 2).join(' ');
@@ -17,7 +17,6 @@ export default async function handler(req, res) {
     // THE 12-SOURCE DATA ENGINE (All Parallel)
     // =======================================================================
     
-    // 1-6: Existing APIs (Reddit, World Bank, News, Country, Crypto, Climate)
     const fetchReddit = async () => { try { const r = await fetch(`https://www.reddit.com/search.json?q=${getKw(3)}&limit=3`); const d = await r.json(); return "Reddit Chatter: " + d.data.children.map(c => c.data.title).join(" | "); } catch(e) { return ""; } };
     const fetchWorldBank = async () => { try { const r = await fetch('https://api.worldbank.org/v2/country/IND/indicator/NY.GDP.PCAP.CD?format=json&mrnev=1'); const d = await r.json(); return `India GDP/Capita: $${Math.round(d[1][0].value)}`; } catch(e) { return ""; } };
     const fetchNews = async () => { try { if(!newsKey) return ""; const r = await fetch(`https://newsapi.org/v2/everything?q=${getKw(2)}&pageSize=3&language=en&apiKey=${newsKey}`); const d = await r.json(); return "News: " + d.articles.map(a => a.title).join(" | "); } catch(e) { return ""; } };
@@ -25,7 +24,6 @@ export default async function handler(req, res) {
     const fetchFinance = async () => { try { const r = await fetch(`https://api.coingecko.com/api/v3/search?query=${getKw(1)}`); const d = await r.json(); return d.coins.length > 0 ? `Crypto/Tech Signal: ${d.coins[0].name}` : ""; } catch(e) { return ""; } };
     const fetchClimate = async () => { try { const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=18.52&longitude=73.85&current_weather=true`); const d = await r.json(); return `Local Temp Context (Pune): ${d.current_weather.temperature}°C`; } catch(e) { return ""; } };
     
-    // 7. NEW: Serper.dev (Live Google Search for Competitors)
     const fetchSerper = async () => { 
       try { 
         if(!serperKey) return ""; 
@@ -38,7 +36,6 @@ export default async function handler(req, res) {
       } catch(e) { return ""; } 
     };
 
-    // 8. NEW: iTunes App Store (Are there apps for this?)
     const fetchAppStore = async () => { 
       try { 
         const r = await fetch(`https://itunes.apple.com/search?term=${getKw(2)}&entity=software&limit=2`); 
@@ -47,7 +44,6 @@ export default async function handler(req, res) {
       } catch(e) { return ""; } 
     };
 
-    // 9. NEW: Wikipedia (Industry Definition)
     const fetchWiki = async () => { 
       try { 
         const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${getKw(1)}`); 
@@ -56,7 +52,6 @@ export default async function handler(req, res) {
       } catch(e) { return ""; } 
     };
 
-    // 10. NEW: Alpha Vantage (Macro Market Sentiment)
     const fetchAlpha = async () => { 
       try { 
         if(!alphaVantageKey) return ""; 
@@ -66,12 +61,10 @@ export default async function handler(req, res) {
       } catch(e) { return ""; } 
     };
 
-    // 11. NEW: OpenStreetMap (Local Business Density)
     const fetchMap = async () => { 
       try { return "MAP DATA: Urban density in target regions (India Tier 1) is highly saturated but fragmented."; } catch(e) { return ""; } 
     };
 
-    // 12. Simulated Trends
     const fetchTrends = () => "SEARCH TRENDS: 18% YoY Growth in this sector.";
 
     // 🔥 EXECUTE ALL 12 APIS AT THE EXACT SAME TIME 🔥
@@ -84,10 +77,10 @@ export default async function handler(req, res) {
     const contextStrings = results.map(r => r.status === 'fulfilled' ? r.value : "").join("\n");
 
     // =======================================================================
-    // THE "GOD MODE" AI PROMPT
+    // THE AI PROMPT (Using Gemini 1.5 Flash for speed & no strict rate limits)
     // =======================================================================
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,7 +97,7 @@ export default async function handler(req, res) {
               
               CRITICAL RULES:
               1. DO NOT guess competitors. Use the "LIVE COMPETITORS (Google)" and "APP STORE PRESENCE" data provided above.
-              2. Validate your market size (TAM/SAM) using the "India GDP" and "India Pop" data. Be realistic. If GDP/capita is low, high-ticket items have a tiny SOM.
+              2. Validate your market size (TAM/SAM) using the "India GDP" and "India Pop" data. Be realistic.
               3. Incorporate the "Reddit Chatter" as exact pain points for the Customer Personas.
               4. Make the Expert quotes (Kunal Shah, Paul Graham) highly specific to the data provided.
 
@@ -130,10 +123,29 @@ export default async function handler(req, res) {
     );
 
     const resultData = await response.json();
+
+    // 🔥 THE SAFETY NET: Catch Google API errors before they crash the app 🔥
+    if (!resultData.candidates || resultData.candidates.length === 0) {
+      console.error("Gemini API Error:", resultData);
+      return res.status(500).json({ 
+        error: "AI Provider Error", 
+        message: resultData.error?.message || "The AI is currently overloaded. Please try again in a few seconds." 
+      });
+    }
+
     const text = resultData.candidates[0].content.parts[0].text;
-    return res.status(200).json(JSON.parse(text));
+    
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+    }
+
+    return res.status(200).json(parsed);
 
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    console.error("Server Error:", error);
+    return res.status(500).json({ error: error.message || "An unexpected error occurred" });
   }
 }
