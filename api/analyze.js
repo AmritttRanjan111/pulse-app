@@ -74,7 +74,23 @@ export default async function handler(req, res) {
       fetchWiki(), fetchAlpha(), fetchMap()
     ]);
     
-    const contextStrings = results.map(r => r.status === 'fulfilled' ? r.value : "").join("\n");
+    // Save the raw data cleanly into an object so we can send it to the frontend
+    const rawSources = {
+      reddit: results[0].status === 'fulfilled' ? results[0].value : "No Reddit data found.",
+      worldBank: results[1].status === 'fulfilled' ? results[1].value : "No macro economic data found.",
+      news: results[2].status === 'fulfilled' ? results[2].value : "No news data found.",
+      country: results[3].status === 'fulfilled' ? results[3].value : "No demographic data found.",
+      finance: results[4].status === 'fulfilled' ? results[4].value : "No finance data found.",
+      climate: results[5].status === 'fulfilled' ? results[5].value : "No climate data found.",
+      google: results[6].status === 'fulfilled' ? results[6].value : "No Google search data found.",
+      appStore: results[7].status === 'fulfilled' ? results[7].value : "No App Store data found.",
+      wikipedia: results[8].status === 'fulfilled' ? results[8].value : "No Wikipedia data found.",
+      alphaVantage: results[9].status === 'fulfilled' ? results[9].value : "No market sentiment data found.",
+      map: results[10].status === 'fulfilled' ? results[10].value : "No Map data found.",
+      trends: fetchTrends()
+    };
+
+    const contextStrings = Object.values(rawSources).filter(v => v !== "" && !v.includes("No ")).join("\n");
 
     // =======================================================================
     // THE AI PROMPT (Using Gemini 2.5 Flash for speed & stability)
@@ -93,20 +109,24 @@ export default async function handler(req, res) {
               
               LIVE DATA STREAMS:
               ${contextStrings}
-              ${fetchTrends()}
               
               CRITICAL RULES:
               1. DO NOT guess competitors. Use the "LIVE COMPETITORS (Google)" and "APP STORE PRESENCE" data provided above.
-              2. Validate your market size (TAM/SAM) using the "India GDP" and "India Pop" data. Be realistic.
+              2. YOU MUST PROVIDE A NUMERICAL ESTIMATE for TAM, SAM, and SOM (e.g., $5B, ₹500 Cr). Even if exact raw data is missing or returns 0, use your general knowledge and logical deduction to provide a realistic rough estimate. NEVER say "impossible to calculate", "unknown", or write long sentences in the TAM/SAM/SOM fields. 
               3. Incorporate the "Reddit Chatter" as exact pain points for the Customer Personas.
-              4. Make the Expert quotes (Kunal Shah, Paul Graham) highly specific to the data provided.
+              4. Make the Expert quotes highly specific to the data provided.
 
               RETURN VALID JSON ONLY EXACTLY LIKE THIS STRUCTURE:
               {
                 "businessTitle": "string",
                 "viabilityScore": number,
                 "scoreVerdict": "string",
-                "market": {"tam": "string", "sam": "string", "som": "string", "summary": "string"},
+                "market": {
+                  "tam": "Short numerical string (e.g. ₹10,000 Cr)", 
+                  "sam": "Short numerical string (e.g. ₹2,000 Cr)", 
+                  "som": "Short numerical string (e.g. ₹50 Cr)", 
+                  "summary": "Detailed 2-sentence explanation of how you calculated these numbers."
+                },
                 "survey": {"keyFinding": "string", "results": [{"label": "string", "percentage": number}]},
                 "competitors": "string",
                 "personas": [{"name": "string", "demo": "string", "desc": "string"}],
@@ -124,7 +144,6 @@ export default async function handler(req, res) {
 
     const resultData = await response.json();
 
-    // 🔥 THE SAFETY NET: Catch Google API errors before they crash the app 🔥
     if (!resultData.candidates || resultData.candidates.length === 0) {
       console.error("Gemini API Error:", resultData);
       return res.status(500).json({ 
@@ -141,6 +160,9 @@ export default async function handler(req, res) {
     } catch (e) {
       parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
     }
+
+    // 🔥 INJECT THE RAW SOURCES INTO THE FINAL RESPONSE 🔥
+    parsed.rawSources = rawSources;
 
     return res.status(200).json(parsed);
 
