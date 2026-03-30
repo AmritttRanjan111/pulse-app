@@ -36,7 +36,7 @@ nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding
 .hero h1 span{background:linear-gradient(135deg, #1A8EC4, #2ECC8A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .hero p{font-size:16px;color:var(--t2);line-height:1.7;max-width:480px;margin:0 auto 40px}
 
-/* INPUT AREA & GLASSMORPHISM */
+/* INPUT AREA */
 .input-card{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);box-shadow:0 4px 24px -8px rgba(0,0,0,0.5);border-radius:16px;padding:28px;max-width:720px;margin:0 auto 32px;transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease}
 .input-label{font-size:12px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px}
 .idea-input{width:100%;background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;font-size:15px;color:var(--t1);font-family:var(--font);resize:vertical;min-height:80px;outline:none;transition:all 0.3s ease;box-shadow:inset 0 2px 4px rgba(0,0,0,0.2)}
@@ -54,7 +54,7 @@ nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding
 .analyze-btn:active:not(:disabled){transform:translateY(1px) scale(0.98)}
 .analyze-btn:disabled{opacity:0.5;cursor:not-allowed}
 
-/* LOADING STATE & SKELETONS */
+/* LOADING STATE */
 .loading-state{display:none;text-align:center;padding:48px 32px;max-width:720px;margin:0 auto}
 .loading-state.active{display:block}
 .loading-spinner{width:40px;height:40px;border:2px solid rgba(255,255,255,0.08);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px}
@@ -71,17 +71,17 @@ nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding
 .loading-step.done{color:var(--success)}
 .step-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
 
-/* REPORT AREA & STICKY HEADER */
+/* REPORT AREA & HEADER (Removed sticky positioning to fix overlap) */
 .report-area{display:none;max-width:720px;margin:0 auto;padding:0 32px 60px}
 .report-area.active{display:block}
-.report-sticky-header{position:sticky;top:56px;z-index:90;background:rgba(12,15,20,0.85);backdrop-filter:blur(12px);padding:16px 0;margin-bottom:24px;border-bottom:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.report-header{background:rgba(12,15,20,0.85);backdrop-filter:blur(12px);padding:16px 0;margin-bottom:24px;border-bottom:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
 .report-actions{display:flex;gap:8px}
 .action-btn{background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 16px;font-size:13px;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all 0.15s;display:flex;align-items:center;gap:6px}
 .action-btn:hover{border-color:var(--blue);color:var(--blue-light)}
 .primary-btn{color:#fff;background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2)}
 .primary-btn:hover{background:rgba(255,255,255,0.15);color:#fff}
 
-/* SCORE BADGE DYNAMIC */
+/* SCORE BADGE */
 .score-row{display:flex;align-items:center;gap:16px;margin:0;border:none;background:transparent;padding:0}
 .score-circle{width:56px;height:56px;border-radius:50%;background:conic-gradient(#2ECC8A 0%,var(--bg2) 0%);display:flex;align-items:center;justify-content:center;border:none}
 .score-inner{width:48px;height:48px;border-radius:50%;background:var(--bg1);display:flex;align-items:center;justify-content:center}
@@ -90,7 +90,7 @@ nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding
 .score-business{font-size:15px;font-weight:500;color:var(--t1);margin-bottom:3px}
 .score-verdict{font-size:12px;color:var(--t2)}
 
-/* SECTION CARDS & ANIMATIONS */
+/* SECTION CARDS */
 .section-card{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);box-shadow:0 4px 24px -8px rgba(0,0,0,0.5);border-radius:12px;padding:20px;margin-bottom:14px;transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease}
 .section-card:hover{transform:translateY(-2px);box-shadow:0 12px 32px -8px rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.15)}
 .fade-up{opacity:0;transform:translateY(20px);animation:fadeUpAnim 0.6s cubic-bezier(0.16,1,0.3,1) forwards}
@@ -107,15 +107,28 @@ nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding
 .section-body{font-size:13px;color:var(--t2);line-height:1.75;white-space:pre-wrap}
 .section-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);margin:16px 0}
 
-/* TOOLTIPS & METRICS */
+/* METRICS (Updated Font & Sizing to fix overflow) */
 .metric-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 .metric-box{background:var(--bg2);border-radius:8px;padding:12px;text-align:center}
 .metric-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px}
-.metric-value{font-size:18px;font-weight:600;color:var(--t1);font-family:var(--mono)}
+.metric-value{font-size:16px;font-weight:600;color:var(--t1);font-family:var(--font);word-wrap:break-word;line-height:1.3}
 .has-tooltip{cursor:help;border-bottom:1px dotted var(--t3);position:relative}
 .has-tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--bg3);color:var(--t1);padding:6px 10px;border-radius:6px;font-size:11px;white-space:nowrap;font-family:var(--font);z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.5);pointer-events:none}
 
-/* BAR CHART (Enhanced) */
+/* CLICKABLE BADGES FOR RAW DATA */
+.source-badge { cursor: pointer; transition: all 0.2s ease; }
+.source-badge:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+/* RAW DATA MODAL */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.active { display: flex; }
+.modal-content { background: var(--bg1); border: 1px solid var(--glass-border); border-radius: 12px; width: 100%; max-width: 500px; padding: 24px; position: relative; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+.modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--t3); font-size: 20px; cursor: pointer; transition: color 0.2s; }
+.modal-close:hover { color: var(--t1); }
+.modal-title { font-size: 16px; font-weight: 600; color: var(--t1); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.modal-body-text { font-size: 13px; color: var(--t2); line-height: 1.6; white-space: pre-wrap; background: var(--bg0); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04); font-family: var(--mono); }
+
+/* BAR CHART */
 .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .bar-label{font-size:12px;color:var(--t2);width:140px;flex-shrink:0}
 .bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
@@ -146,7 +159,6 @@ nav{background:var(--bg1);border-bottom:1px solid rgba(255,255,255,0.06);padding
 .error-box{background:var(--danger-bg);border:1px solid rgba(163,48,48,0.3);border-radius:12px;padding:20px;font-size:13px;color:#E05555}
 footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:1px solid rgba(255,255,255,0.04)}
 
-/* RESPONSIVE */
 @media(max-width:600px){
   .hero h1{font-size:28px}
   .metric-grid{grid-template-columns:1fr}
@@ -215,7 +227,7 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
 
 <div class="report-area" id="reportArea">
   
-  <div class="report-sticky-header">
+  <div class="report-header">
     <div class="score-row">
       <div class="score-circle" id="scoreCircle">
         <div class="score-inner">
@@ -233,15 +245,17 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
       <button class="action-btn primary-btn" onclick="resetApp()">↩ Edit Idea</button>
     </div>
   </div>
-<div class="section-card fade-up" style="animation-delay: 0.05s; padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-    <div style="font-size: 12px; color: var(--t2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Verified Sources Used:</div>
+
+  <div class="section-card fade-up" style="animation-delay: 0.05s; padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <div style="font-size: 12px; color: var(--t2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Click to view Raw API Data:</div>
     <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="dataSourceBadges">
-      <span class="hint-pill" style="pointer-events: none; border-color: var(--blue); color: var(--blue-light);">📡 Reddit API</span>
-      <span class="hint-pill" style="pointer-events: none; border-color: var(--success); color: #2ECC8A;">📈 Google Trends API</span>
-      <span class="hint-pill" style="pointer-events: none; border-color: var(--amber); color: var(--amber);">📰 NewsAPI</span>
-      <span class="hint-pill" style="pointer-events: none; border-color: var(--t3); color: var(--t2);">📊 World Bank (Macro)</span>
+      <span class="hint-pill source-badge" style="border-color: var(--blue); color: var(--blue-light);" onclick="openSourceModal('reddit', '📡 Reddit API')">📡 Reddit API</span>
+      <span class="hint-pill source-badge" style="border-color: var(--success); color: #2ECC8A;" onclick="openSourceModal('google', '📈 Google Live Search')">📈 Google Search</span>
+      <span class="hint-pill source-badge" style="border-color: var(--amber); color: var(--amber);" onclick="openSourceModal('news', '📰 NewsAPI')">📰 NewsAPI</span>
+      <span class="hint-pill source-badge" style="border-color: var(--t3); color: var(--t1);" onclick="openSourceModal('worldBank', '📊 World Bank (Macro)')">📊 World Bank</span>
     </div>
   </div>
+
   <div class="section-card fade-up" style="animation-delay: 0.1s;">
     <div class="section-head">
       <div class="section-icon si-blue">📐</div>
@@ -335,6 +349,15 @@ footer{text-align:center;padding:32px;font-size:12px;color:var(--t3);border-top:
 
 <footer>Pulse · AI-powered market research for small businesses · All AI-generated content is labelled · Not financial advice</footer>
 
+<div class="modal-overlay" id="sourceModal" onclick="closeModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal(event)">✕</button>
+    <div class="modal-title" id="modalTitle">📡 Verified Source Data</div>
+    <div style="font-size: 11px; color: var(--t3); margin-bottom: 16px;">This is the exact raw data fetched from the internet and fed into the AI before generating your report.</div>
+    <div class="modal-body-text" id="modalText">Loading...</div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -381,6 +404,28 @@ function animateScore(score) {
 
 function triggerConfetti() {
   confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#2ECC8A', '#1A8EC4', '#C98A00'] });
+}
+
+/* -------- Modal Logic -------- */
+function openSourceModal(sourceKey, title) {
+  const modal = document.getElementById('sourceModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalText = document.getElementById('modalText');
+
+  modalTitle.textContent = title;
+
+  if (window.currentRawSources && window.currentRawSources[sourceKey]) {
+    modalText.textContent = window.currentRawSources[sourceKey];
+  } else {
+    modalText.textContent = "Data was fetched from the API, but no readable text output was returned for this session.";
+  }
+
+  modal.classList.add('active');
+}
+
+function closeModal(e) {
+  if(e) e.preventDefault();
+  document.getElementById('sourceModal').classList.remove('active');
 }
 
 /* -------- helpers & Core Logic -------- */
@@ -505,8 +550,10 @@ function displayReport(r, idea){
 
   document.getElementById('gtmBody').textContent = r.gtm || '';
 
+  // Store globally so the Modal can access them
   window.currentReport = r;
   window.currentIdea = idea;
+  window.currentRawSources = r.rawSources || null; 
 }
 
 /* -------- EXPORT TO PDF -------- */
