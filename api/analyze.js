@@ -77,10 +77,10 @@ export default async function handler(req, res) {
     const contextStrings = results.map(r => r.status === 'fulfilled' ? r.value : "").join("\n");
 
     // =======================================================================
-    // THE AI PROMPT (Using Gemini 1.5 Flash for speed & no strict rate limits)
+    // THE AI PROMPT (Using Gemini 2.5 Flash for speed & stability)
     // =======================================================================
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
